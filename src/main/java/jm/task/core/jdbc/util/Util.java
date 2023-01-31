@@ -11,16 +11,21 @@ public class Util {
     private static final String PASSWORD = "rootadm";
 
     public static Connection getConnection() {
-
         Connection connection = null;
 
         try {
             Driver driver = new com.mysql.cj.jdbc.Driver();
             DriverManager.registerDriver(driver);
             connection = DriverManager.getConnection(HOST, NAME, PASSWORD);
+            connection.setAutoCommit(false);
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return connection;
     }
+
+    public static class HibernateUtil {
+
+    }
+
 }

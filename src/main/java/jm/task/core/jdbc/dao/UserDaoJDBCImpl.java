@@ -17,54 +17,77 @@ public class UserDaoJDBCImpl implements UserDao {
 
     private static String INSERT_USER = "INSERT INTO UsersTable(name, lastName, age) VALUES (?,?,?);";
     private static String DELETE_USER = "DELETE FROM UsersTable WHERE id=?;";
+    private static final Connection connection = Util.getConnection();
     public UserDaoJDBCImpl() {
 
     }
 
     public void createUsersTable() {
-        try (Connection connection = Util.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(CREATE_TABLE)) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(CREATE_TABLE)) {
 
             preparedStatement.executeUpdate();
-
+            connection.commit();
         } catch (SQLException e) {
+            try {
+                connection.rollback();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
             e.printStackTrace();
         }
     }
 
     public void dropUsersTable() {
-        try (Connection connection = Util.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(DELETE_TABLE)) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(DELETE_TABLE)) {
             preparedStatement.executeUpdate();
 
+            connection.commit();
 
         } catch (SQLException e) {
+            try {
+                connection.rollback();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
             e.printStackTrace();
         }
     }
 
     public void saveUser(String name, String lastName, byte age) {
-        try (Connection connection = Util.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(INSERT_USER)) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(INSERT_USER)) {
 
             preparedStatement.setString(1, name);
             preparedStatement.setString(2, lastName);
             preparedStatement.setByte(3, age);
             preparedStatement.executeUpdate();
 
+            connection.commit();
+
             System.out.println("User с именем - " + name + " добавлен в базу данных");
 
         } catch (SQLException e) {
+            try {
+                connection.rollback();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
             e.printStackTrace();
         }
     }
 
     public void removeUserById(long id) {
-        try (Connection connection = Util.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(DELETE_USER)) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(DELETE_USER)) {
             preparedStatement.setLong(1, id);
             preparedStatement.executeUpdate();
+
+            connection.commit();
+
         } catch (SQLException e) {
+            try {
+                connection.rollback();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
             e.printStackTrace();
         }
     }
@@ -72,8 +95,7 @@ public class UserDaoJDBCImpl implements UserDao {
     public List<User> getAllUsers() {
         List<User> users = new ArrayList<>();
 
-        try (Connection connection = Util.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM UsersTable")) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM UsersTable")) {
 
             ResultSet resultSet = preparedStatement.executeQuery();
 
@@ -91,21 +113,31 @@ public class UserDaoJDBCImpl implements UserDao {
 
                 users.add(user);
             }
-
+            connection.commit();
 
         } catch (SQLException e) {
+            try {
+                connection.rollback();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
             e.printStackTrace();
         }
         return users;
     }
 
     public void cleanUsersTable() {
-        try (Connection connection = Util.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement("DELETE FROM UsersTable;")) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement("DELETE FROM UsersTable;")) {
             preparedStatement.executeUpdate();
 
+            connection.commit();
 
         } catch (SQLException e) {
+            try {
+                connection.rollback();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
             e.printStackTrace();
         }
 
